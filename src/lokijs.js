@@ -65,6 +65,15 @@
         for (idx = 0; idx < transform.length; idx++) {
           // clone transform so our scan and replace can operate directly on cloned transform
           clonedStep = JSON.parse(JSON.stringify(transform[idx]));
+
+          // Restoring step functions if any present (they lost during JSON.stringify)
+          for ( var key in transform[idx])  {
+            var isFunc = transform[idx].hasOwnProperty(key) && ("function" == typeof transform[idx][key]);
+            if ( isFunc ) {
+              clonedStep[key] = transform[idx][key];
+            }
+          }
+
           resolvedTransform.push(Utils.resolveTransformObject(clonedStep, params));
         }
 
@@ -2835,7 +2844,7 @@
           break;
           // following cases break chain by returning array data so make any of these last in transform steps
         case "mapReduce":
-          rs = rs.mapReduce(step.mapFunction, step.reduceFunction);
+          rs = rs.mapReduce(step.mapFunction, step.reduceFunction, step.value);
           break;
           // following cases update documents in current filtered resultset (use carefully)
         case "update":
@@ -3492,7 +3501,7 @@
      */
     Resultset.prototype.mapReduce = function (mapFunction, reduceFunction) {
       try {
-        return reduceFunction(this.data().map(mapFunction));
+        return reduceFunction(this.data().map(mapFunction), value);
       } catch (err) {
         throw err;
       }
