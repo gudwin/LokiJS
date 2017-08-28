@@ -3499,7 +3499,7 @@
      * @returns {value} The output of your reduceFunction
      * @memberof Resultset
      */
-    Resultset.prototype.mapReduce = function (mapFunction, reduceFunction) {
+    Resultset.prototype.mapReduce = function (mapFunction, reduceFunction, value) {
       try {
         return reduceFunction(this.data().map(mapFunction), value);
       } catch (err) {
